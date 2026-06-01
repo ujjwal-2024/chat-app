@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+.rs {
+  color: white;
+  background: rgba(255,255,255,0.06);
+  border-left: 1px solid rgba(255,255,255,0.12);
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Sora', sans-serif;
+  min-width: 0;
+}
+
+.rs-profile {
+  padding: 30px 16px 16px;
+  text-align: center;
+}
+
+.rs-profile img {
+  width: 80px;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.3);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.rs-profile h3 {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.rs-profile p {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 300;
+  line-height: 1.6;
+  padding: 0 8px;
+}
+
+.rs hr {
+  border: none;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+  margin: 0 14px;
+}
+
+.rs-media {
+  padding: 14px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  flex: 1;
+}
+
+.rs-media div {
+  max-height: 180px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.rs-media div img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 8px;
+  cursor: pointer;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.2s;
+}
+
+.rs-media div img:hover {
+  transform: scale(1.05);
+  border-color: rgba(167,139,250,0.5);
+}
+
+.rs button {
+  margin: 14px auto;
+  display: block;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 9px 32px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.25s;
+  font-family: 'Sora', sans-serif;
+}
+
+.rs button:hover {
+  background: rgba(239,68,68,0.2);
+  border-color: rgba(239,68,68,0.4);
+  color: #fca5a5;
+}
+
+/* Tablet — hide on small screens */
+@media (max-width: 1024px) {
+  .rs { display: none; }
+}
+
+@media (max-width: 900px) {
+  .rs { display: none; }
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <!-- Blue rounded square bubble -->
+  <rect x="60" y="50" width="480" height="400" rx="90" ry="90" fill="#077EFF"/>
+  <!-- Tail pointing down-center -->
+  <polygon points="260,440 340,440 300,530" fill="#077EFF"/>
+  <!-- Three white dots -->
+  <circle cx="190" cy="255" r="42" fill="#FFFFFF"/>
+  <circle cx="300" cy="255" r="42" fill="#FFFFFF"/>
+  <circle cx="410" cy="255" r="42" fill="#FFFFFF"/>
+</svg>
