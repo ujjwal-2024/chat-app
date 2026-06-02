@@ -963,3 +963,39 @@
 }
 
 .translated-text button:hover { color: white; }
+
+/* Fix messages going behind input bar */
+.chat-msg {
+  flex: 1 !important;
+  padding: 16px 16px 120px !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  gap: 4px !important;
+  position: relative !important;
+  z-index: 0 !important;
+}
+
+.chat-input {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 10 !important;
+}
+
+.smart-replies {
+  position: absolute !important;
+  bottom: 58px !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9 !important;
+}
+
+.reply-bar {
+  position: absolute !important;
+  bottom: 58px !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9 !important;
+}
