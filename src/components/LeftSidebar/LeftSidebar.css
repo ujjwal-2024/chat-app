@@ -191,3 +191,107 @@
   .friends p { font-size: 12px; }
   .friends span { font-size: 10px; }
 }
+
+/* Find People Section */
+.find-people-section {
+  margin-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 8px;
+}
+
+.find-people-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(167,139,250,0.1);
+  border: 1px solid rgba(167,139,250,0.25);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: #c4b5fd;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Sora', sans-serif;
+}
+
+.find-people-toggle:hover {
+  background: rgba(167,139,250,0.2);
+  border-color: rgba(167,139,250,0.4);
+}
+
+.find-people-list {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: fadeInUp 0.2s ease both;
+}
+
+.find-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  transition: all 0.2s;
+  background: rgba(255,255,255,0.04);
+}
+
+.find-person:hover { background: rgba(255,255,255,0.08); }
+
+.find-person img {
+  width: 36px;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.2);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.find-person-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.find-person-info p {
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.find-person-info span {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+}
+
+.add-btn {
+  background: linear-gradient(135deg, #a78bfa, #7c3aed);
+  border: none;
+  border-radius: 20px;
+  padding: 5px 10px;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: 'Sora', sans-serif;
+  flex-shrink: 0;
+}
+
+.add-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(124,58,237,0.4);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px 16px;
+  color: rgba(255,255,255,0.3);
+  font-size: 13px;
+}
