@@ -852,3 +852,114 @@
 
 .reaction-picker.left { right: 0; left: auto; top: -48px; }
 .reaction-picker.right { left: 0; right: auto; top: -48px; }
+
+/* Smart Replies */
+.smart-replies {
+  display: flex;
+  gap: 8px;
+  padding: 8px 14px;
+  overflow-x: auto;
+  background: rgba(255,255,255,0.04);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.smart-replies::-webkit-scrollbar { display: none; }
+
+.smart-reply-btn {
+  background: rgba(167,139,250,0.15);
+  border: 1px solid rgba(167,139,250,0.3);
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: #c4b5fd;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  font-family: 'Sora', sans-serif;
+}
+
+.smart-reply-btn:hover {
+  background: rgba(167,139,250,0.3);
+  border-color: rgba(167,139,250,0.6);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Translator */
+.translate-wrap {
+  position: relative;
+}
+
+.lang-menu {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  background: rgba(20,10,40,0.97);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 6px;
+  min-width: 110px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  backdrop-filter: blur(20px);
+  z-index: 50;
+  animation: fadeInUp 0.15s ease both;
+}
+
+.lang-option {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.75);
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  font-family: 'Sora', sans-serif;
+}
+
+.lang-option:hover { background: rgba(255,255,255,0.1); color: white; }
+
+.translated-text {
+  background: rgba(167,139,250,0.1);
+  border: 1px solid rgba(167,139,250,0.25);
+  border-radius: 10px;
+  padding: 7px 10px;
+  margin-top: 4px;
+  max-width: 220px;
+  position: relative;
+}
+
+.translated-label {
+  font-size: 9px;
+  color: #a78bfa;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.translated-text p {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.5;
+}
+
+.translated-text button {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.translated-text button:hover { color: white; }

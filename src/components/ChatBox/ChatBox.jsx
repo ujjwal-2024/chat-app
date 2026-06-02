@@ -6,6 +6,7 @@ import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firesto
 import { db } from '../../config/firebase';
 import { toast } from 'react-toastify';
 import upload from '../../lib/upload';
+import { getSmartReplies, translateMessage } from '../../lib/ai';
 
 const REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
 const DISAPPEAR_OPTIONS = [
@@ -36,6 +37,15 @@ const ChatBox = () => {
 
   // #10 Fullscreen image lightbox
   const [lightboxImage, setLightboxImage] = useState(null);
+
+  // Smart replies
+  const [smartReplies, setSmartReplies] = useState([]);
+  const [loadingReplies, setLoadingReplies] = useState(false);
+
+  // Translator
+  const [translatedMsg, setTranslatedMsg] = useState({});
+  const [showLangMenu, setShowLangMenu] = useState(null);
+  const LANGUAGES = ['Hindi', 'Spanish', 'French', 'Arabic', 'Japanese', 'German'];
 
   const scrollEnd = useRef();
   const typingTimeoutRef = useRef(null);
@@ -426,6 +436,23 @@ const ChatBox = () => {
                     </>
                   )}
                   <button className="action-btn" onClick={() => handleReply(msg)} title="Reply">↩️</button>
+                  {!msg.image && msg.text && !msg.deleted && (
+                    <div className="translate-wrap">
+                      <button className="action-btn" onClick={() => setShowLangMenu(showLangMenu === index ? null : index)} title="Translate">🌍</button>
+                      {showLangMenu === index && (
+                        <div className="lang-menu">
+                          {LANGUAGES.map(lang => (
+                            <button key={lang} className="lang-option" onClick={async () => {
+                              setShowLangMenu(null);
+                              toast.info(`Translating to ${lang}...`);
+                              const translated = await translateMessage(msg.text, lang);
+                              setTranslatedMsg(prev => ({ ...prev, [index]: { text: translated, lang } }));
+                            }}>{lang}</button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -480,6 +507,15 @@ const ChatBox = () => {
                   )}
                 </div>
               )}
+
+              {/* Translated message */}
+              {translatedMsg[index] && (
+                <div className="translated-text">
+                  <span className="translated-label">🌍 {translatedMsg[index].lang}</span>
+                  <p>{translatedMsg[index].text}</p>
+                  <button onClick={() => setTranslatedMsg(prev => { const n = {...prev}; delete n[index]; return n; })}>✕</button>
+                </div>
+              )}
             </div>
 
             <div>
@@ -497,6 +533,17 @@ const ChatBox = () => {
             <span className="reply-bar-text">{replyTo.image ? '📷 Image' : replyTo.text?.slice(0, 60)}</span>
           </div>
           <button onClick={() => setReplyTo(null)} className="reply-bar-close">✕</button>
+        </div>
+      )}
+
+      {/* Smart replies — show for last received message */}
+      {messages.length > 0 && messages[0].sId !== userData.id && !messages[0].deleted && messages[0].text && (
+        <div className="smart-replies">
+          {getSmartReplies(messages[0].text).map((reply, i) => (
+            <button key={i} className="smart-reply-btn" onClick={() => setInput(reply)}>
+              {reply}
+            </button>
+          ))}
         </div>
       )}
 
