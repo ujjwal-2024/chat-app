@@ -999,3 +999,49 @@
   right: 0 !important;
   z-index: 9 !important;
 }
+
+/* FINAL FIX - messages overlap input */
+.chat-box {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.chat-msg {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 16px 16px 16px !important;
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  gap: 4px !important;
+  min-height: 0 !important;
+}
+
+.chat-input {
+  flex-shrink: 0 !important;
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  z-index: 10 !important;
+}
+
+.smart-replies {
+  flex-shrink: 0 !important;
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  z-index: 9 !important;
+}
+
+.reply-bar {
+  flex-shrink: 0 !important;
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  z-index: 9 !important;
+}
