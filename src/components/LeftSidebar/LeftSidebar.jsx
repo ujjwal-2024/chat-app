@@ -4,7 +4,7 @@ import assets from '../../assets/assets'
 import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
 import { db, logout } from '../../config/firebase';
-import { arrayUnion, collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore';
+import { arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where, arrayRemove } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 const LeftSidebar = () => {
@@ -14,7 +14,26 @@ const LeftSidebar = () => {
     const [showSearch, setShowSearch] = useState(false);
     const [allUsers, setAllUsers] = useState([]);
     const [showFindPeople, setShowFindPeople] = useState(false);
+    const [requests, setRequests] = useState([]);
+    const [showRequests, setShowRequests] = useState(false);
     const navigate = useNavigate();
+
+    // Listen to incoming chat requests
+    useEffect(() => {
+        if (!userData) return;
+        const userRef = doc(db, "users", userData.id);
+        const unSub = onSnapshot(userRef, async (snap) => {
+            const data = snap.data();
+            const incoming = data?.chatRequests || [];
+            // Fetch sender details for each request
+            const detailed = await Promise.all(incoming.map(async (req) => {
+                const senderSnap = await getDoc(doc(db, "users", req.from));
+                return { ...req, senderData: senderSnap.data() };
+            }));
+            setRequests(detailed);
+        });
+        return () => unSub();
+    }, [userData]);
 
     // Load all users for Find People
     useEffect(() => {
@@ -22,18 +41,13 @@ const LeftSidebar = () => {
             if (!userData) return;
             const usersRef = collection(db, "users");
             const snap = await getDocs(usersRef);
-            const users = snap.docs
-                .map(d => d.data())
-                .filter(u => u.id !== userData.id); // exclude self
+            const users = snap.docs.map(d => d.data()).filter(u => u.id !== userData.id);
             setAllUsers(users);
         };
         loadAllUsers();
     }, [userData]);
 
-    // Users not already in chat list
-    const newUsers = allUsers.filter(u =>
-        !chatData?.some(c => c.rId === u.id)
-    );
+    const newUsers = allUsers.filter(u => !chatData?.some(c => c.rId === u.id));
 
     const inputHandler = async (e) => {
         try {
@@ -48,8 +62,7 @@ const LeftSidebar = () => {
                 if (!snapUsername.empty) foundDoc = snapUsername.docs[0];
                 else if (!snapName.empty) foundDoc = snapName.docs[0];
                 if (foundDoc && foundDoc.data().id !== userData.id) {
-                    let userExist = false;
-                    chatData.map((u) => { if (u.rId === foundDoc.data().id) userExist = true; })
+                    let userExist = chatData?.some(c => c.rId === foundDoc.data().id);
                     if (!userExist) setUser(foundDoc.data());
                     else setUser(null);
                 } else {
@@ -59,32 +72,76 @@ const LeftSidebar = () => {
                 setShowSearch(false);
             }
         } catch (error) {
-            toast.error(error.message)
+            toast.error(error.message);
         }
     }
 
-    const addChat = async (targetUser) => {
+    // Send a chat request instead of directly adding
+    const sendRequest = async (targetUser) => {
         const u = targetUser || user;
+        try {
+            if (u.id === userData.id) return;
+
+            // Check if request already sent
+            const targetSnap = await getDoc(doc(db, "users", u.id));
+            const targetData = targetSnap.data();
+            const alreadySent = targetData?.chatRequests?.some(r => r.from === userData.id);
+            if (alreadySent) {
+                toast.info("Request already sent!");
+                return;
+            }
+
+            // Add request to target user's chatRequests array
+            await updateDoc(doc(db, "users", u.id), {
+                chatRequests: arrayUnion({
+                    from: userData.id,
+                    sentAt: Date.now()
+                })
+            });
+
+            toast.success(`Request sent to ${u.name}!`);
+            setShowSearch(false);
+            setShowFindPeople(false);
+        } catch (error) {
+            toast.error(error.message);
+        }
+    }
+
+    // Accept request — create actual chat
+    const acceptRequest = async (req) => {
         const messagesRef = collection(db, "messages");
         const chatsRef = collection(db, "chats");
         try {
-            if (u.id === userData.id) return 0;
             const newMessageRef = doc(messagesRef);
             await setDoc(newMessageRef, { createAt: serverTimestamp(), messages: [] });
-            await updateDoc(doc(chatsRef, u.id), {
-                chatsData: arrayUnion({ messageId: newMessageRef.id, lastMessage: "", rId: userData.id, updatedAt: Date.now(), messageSeen: true }),
+
+            await updateDoc(doc(chatsRef, req.from), {
+                chatsData: arrayUnion({ messageId: newMessageRef.id, lastMessage: "", rId: userData.id, updatedAt: Date.now(), messageSeen: true })
             });
             await updateDoc(doc(chatsRef, userData.id), {
-                chatsData: arrayUnion({ messageId: newMessageRef.id, lastMessage: "", rId: u.id, updatedAt: Date.now(), messageSeen: true }),
+                chatsData: arrayUnion({ messageId: newMessageRef.id, lastMessage: "", rId: req.from, updatedAt: Date.now(), messageSeen: true })
             });
-            const uSnap = await getDoc(doc(db, "users", u.id));
-            const uData = uSnap.data();
-            setChat({ messageId: newMessageRef.id, lastMessage: "", rId: u.id, updatedAt: Date.now(), messageSeen: true, userData: uData });
-            setShowSearch(false);
-            setShowFindPeople(false);
-            setChatVisible(true);
+
+            // Remove request
+            await updateDoc(doc(db, "users", userData.id), {
+                chatRequests: arrayRemove({ from: req.from, sentAt: req.sentAt })
+            });
+
+            toast.success(`You are now connected with ${req.senderData?.name}!`);
         } catch (error) {
-            toast.error(error.message)
+            toast.error(error.message);
+        }
+    }
+
+    // Decline request
+    const declineRequest = async (req) => {
+        try {
+            await updateDoc(doc(db, "users", userData.id), {
+                chatRequests: arrayRemove({ from: req.from, sentAt: req.sentAt })
+            });
+            toast.success("Request declined");
+        } catch (error) {
+            toast.error(error.message);
         }
     }
 
@@ -106,7 +163,7 @@ const LeftSidebar = () => {
                 const userRef = doc(db, "users", chatUser.userData.id);
                 const userSnap = await getDoc(userRef);
                 const userData = userSnap.data();
-                setChatUser(prev => ({ ...prev, userData: userData }))
+                setChatUser(prev => ({ ...prev, userData }));
             }
         }
         updateChatUserData();
@@ -134,11 +191,42 @@ const LeftSidebar = () => {
 
             <div className="ls-list">
                 {showSearch && user
-                    ? <div onClick={() => addChat()} className='friends add-user'>
-                        <img src={user.avatar} alt="" />
-                        <p>{user.name}</p>
-                    </div>
+                    ? <div className='friends add-user'>
+                        <img src={user.avatar || 'https://i.pravatar.cc/150'} alt="" />
+                        <div>
+                            <p>{user.name}</p>
+                            <span>@{user.username}</span>
+                        </div>
+                        <button onClick={() => sendRequest(user)} className="add-btn">Send Request</button>
+                      </div>
                     : <>
+                        {/* Incoming Requests */}
+                        {requests.length > 0 && (
+                            <div className="find-people-section">
+                                <button className="find-people-toggle requests-toggle" onClick={() => setShowRequests(!showRequests)}>
+                                    <span>📩 Requests ({requests.length})</span>
+                                    <span>{showRequests ? '▲' : '▼'}</span>
+                                </button>
+                                {showRequests && (
+                                    <div className="find-people-list">
+                                        {requests.map((req, i) => (
+                                            <div key={i} className="find-person">
+                                                <img src={req.senderData?.avatar || 'https://i.pravatar.cc/150'} alt="" />
+                                                <div className="find-person-info">
+                                                    <p>{req.senderData?.name}</p>
+                                                    <span>@{req.senderData?.username}</span>
+                                                </div>
+                                                <div className="request-actions">
+                                                    <button onClick={() => acceptRequest(req)} className="accept-btn">✓</button>
+                                                    <button onClick={() => declineRequest(req)} className="decline-btn">✕</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Existing chats */}
                         {chatData && chatData.map((item, index) => (
                             <div onClick={() => setChat(item)} key={index} className={`friends ${item.messageSeen || item.messageId === messagesId ? "" : "border"}`}>
@@ -150,17 +238,13 @@ const LeftSidebar = () => {
                             </div>
                         ))}
 
-                        {/* Find People section */}
+                        {/* Find People */}
                         {newUsers.length > 0 && (
                             <div className="find-people-section">
-                                <button
-                                    className="find-people-toggle"
-                                    onClick={() => setShowFindPeople(!showFindPeople)}
-                                >
+                                <button className="find-people-toggle" onClick={() => setShowFindPeople(!showFindPeople)}>
                                     <span>👥 Find People ({newUsers.length})</span>
                                     <span>{showFindPeople ? '▲' : '▼'}</span>
                                 </button>
-
                                 {showFindPeople && (
                                     <div className="find-people-list">
                                         {newUsers.map((u, i) => (
@@ -170,18 +254,11 @@ const LeftSidebar = () => {
                                                     <p>{u.name || u.username}</p>
                                                     <span>@{u.username}</span>
                                                 </div>
-                                                <button onClick={() => addChat(u)} className="add-btn">+ Chat</button>
+                                                <button onClick={() => sendRequest(u)} className="add-btn">+ Request</button>
                                             </div>
                                         ))}
                                     </div>
                                 )}
-                            </div>
-                        )}
-
-                        {/* Empty state for new users */}
-                        {(!chatData || chatData.length === 0) && newUsers.length === 0 && (
-                            <div className="empty-state">
-                                <p>No users found</p>
                             </div>
                         )}
                     </>
