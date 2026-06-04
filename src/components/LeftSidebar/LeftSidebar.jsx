@@ -228,12 +228,12 @@ const LeftSidebar = () => {
                         )}
 
                         {/* Existing chats */}
-                        {chatData && chatData.map((item, index) => (
+                        {chatData && chatData.filter(item => item.userData).map((item, index) => (
                             <div onClick={() => setChat(item)} key={index} className={`friends ${item.messageSeen || item.messageId === messagesId ? "" : "border"}`}>
-                                <img src={item.userData.avatar} alt="" />
+                                <img src={item.userData?.avatar || 'https://i.pravatar.cc/150'} alt="" />
                                 <div>
-                                    <p>{item.userData.name}</p>
-                                    <span>{item.lastMessage.slice(0, 30)}</span>
+                                    <p>{item.userData?.name || 'Unknown'}</p>
+                                    <span>{item.lastMessage?.slice(0, 30)}</span>
                                 </div>
                             </div>
                         ))}
