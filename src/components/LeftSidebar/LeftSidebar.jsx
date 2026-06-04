@@ -264,6 +264,22 @@ const LeftSidebar = () => {
                     </>
                 }
             </div>
+
+            {/* Mobile bottom navigation */}
+            <div className="mobile-bottom-nav">
+                <button className="mobile-nav-btn" onClick={() => navigate('/profile')}>
+                    <span>👤</span>
+                    <p>Profile</p>
+                </button>
+                <div className="mobile-nav-btn mobile-user-info">
+                    <span>💬</span>
+                    <p>{userData?.name?.split(' ')[0] || 'Chats'}</p>
+                </div>
+                <button className="mobile-nav-btn logout" onClick={() => logout()}>
+                    <span>🚪</span>
+                    <p>Logout</p>
+                </button>
+            </div>
         </div>
     )
 }

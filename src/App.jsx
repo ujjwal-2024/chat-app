@@ -12,20 +12,36 @@ import { AppContext } from './context/AppContext';
 const App = () => {
 
   const navigate = useNavigate();
-  const {loadUserData,setChatUser,setMessagesId} = useContext(AppContext);
+  const { loadUserData, setChatUser, setMessagesId, setChatVisible, chatVisible } = useContext(AppContext);
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         loadUserData(user.uid);
-      }
-      else{
-        setChatUser(null)
-        setMessagesId(null)
-        navigate('/')
+      } else {
+        setChatUser(null);
+        setMessagesId(null);
+        navigate('/');
       }
     })
   }, [])
+
+  // Handle hardware back button on mobile
+  useEffect(() => {
+    const handlePopState = () => {
+      if (chatVisible) {
+        setChatVisible(false);
+        // Push a new state so back button doesn't exit the app
+        window.history.pushState(null, '', window.location.href);
+      }
+    };
+
+    // Push initial state
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [chatVisible]);
 
   return (
     <>

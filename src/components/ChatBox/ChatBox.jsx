@@ -385,7 +385,7 @@ const ChatBox = () => {
             ? <img className='dot' src={assets.green_dot} alt='' />
             : null}
         </p>
-        <img onClick={() => setChatVisible(false)} className='arrow' src={assets.arrow_icon} alt="" />
+        <img onClick={() => { setChatVisible(false); setChatUser && setChatUser(null); }} className='arrow' src={assets.arrow_icon} alt="" />
         <div className="info-menu-wrap" ref={infoMenuRef}>
           <img className='help' src={assets.help_icon} alt="" onClick={() => setShowInfoMenu(!showInfoMenu)} style={{ cursor: 'pointer' }} />
           {showInfoMenu && (
