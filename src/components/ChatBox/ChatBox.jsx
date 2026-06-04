@@ -7,6 +7,8 @@ import { db } from '../../config/firebase';
 import { toast } from 'react-toastify';
 import upload from '../../lib/upload';
 import { getSmartReplies, translateMessage } from '../../lib/ai';
+import { logout } from '../../config/firebase';
+import { useNavigate } from 'react-router-dom';
 
 const REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
 const DISAPPEAR_OPTIONS = [
@@ -19,6 +21,7 @@ const DISAPPEAR_OPTIONS = [
 const ChatBox = () => {
 
   const { userData, setUserData, messagesId, chatUser, messages, setMessages, chatVisible, setChatVisible, isTyping } = useContext(AppContext);
+  const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [hoveredMsg, setHoveredMsg] = useState(null);
   const [replyTo, setReplyTo] = useState(null);
@@ -395,6 +398,9 @@ const ChatBox = () => {
               </button>
               <hr className="info-divider" />
               <button onClick={clearChat} className="info-option danger">🗑️ Clear Chat</button>
+              <hr className="info-divider mobile-only-divider" />
+              <button onClick={() => navigate('/profile')} className="info-option mobile-only-btn">👤 Edit Profile</button>
+              <button onClick={() => logout()} className="info-option danger mobile-only-btn">🚪 Logout</button>
             </div>
           )}
         </div>
@@ -580,6 +586,10 @@ const ChatBox = () => {
     <div className={`chat-welcome ${chatVisible ? "" : "hidden"}`}>
       <img src={assets.logo_icon} alt='' />
       <p>Chat anytime, anywhere</p>
+      <div className="welcome-mobile-actions">
+        <button onClick={() => navigate('/profile')} className="welcome-action-btn">👤 Profile</button>
+        <button onClick={() => logout()} className="welcome-action-btn logout">🚪 Logout</button>
+      </div>
     </div>
   )
 }
