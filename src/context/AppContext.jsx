@@ -30,11 +30,10 @@ const AppContextProvider = (props) => {
     // Play notification sound when new message arrives from other user
     useEffect(() => {
         if (messages.length > prevMessagesLength.current) {
-            const latestMsg = messages[0]; // messages are reversed
+            const latestMsg = messages[0];
             if (latestMsg && latestMsg.sId !== userData?.id) {
                 const isMuted = userData?.mutedUsers?.includes(latestMsg.sId);
-                if (isMuted) return;
-                playNotificationSound();
+                if (!isMuted) playNotificationSound();
             }
         }
         prevMessagesLength.current = messages.length;
@@ -43,21 +42,15 @@ const AppContextProvider = (props) => {
     const playNotificationSound = () => {
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Create a pleasant "pop" notification sound
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-            
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
             oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.1);
-            
             gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-            
             oscillator.start(audioCtx.currentTime);
             oscillator.stop(audioCtx.currentTime + 0.3);
         } catch (e) {
@@ -69,28 +62,56 @@ const AppContextProvider = (props) => {
         try {
             const userRef = doc(db, 'users', uid);
             const userSnap = await getDoc(userRef);
+
+            // User data not found — sign out and redirect
             if (!userSnap.exists()) {
-                toast.error("User data not found");
+                await auth.signOut();
+                navigate('/');
                 return;
             }
+
             const userData = userSnap.data();
+
+            // Reactivate deactivated account on login
+            if (userData.deactivated) {
+                await updateDoc(userRef, { deactivated: false, deactivatedAt: null });
+                userData.deactivated = false;
+            }
+
             setUserData(userData);
+
             if (userData.avatar && userData.name) {
                 navigate('/chat');
             } else {
-                navigate('/profile')
+                navigate('/profile');
             }
-            await updateDoc(userRef, { lastSeen: Date.now() })
+
+            await updateDoc(userRef, { lastSeen: Date.now() });
+
             setInterval(async () => {
                 if (auth.currentUser) {
-                    await updateDoc(userRef, { lastSeen: Date.now() })
+                    await updateDoc(userRef, { lastSeen: Date.now() });
                 }
             }, 60000);
+
         } catch (error) {
-            toast.error(error.message)
+            console.error(error);
+            // Invalid/expired token — sign out and redirect to login
+            if (
+                error.code === 'auth/user-token-expired' ||
+                error.code === 'auth/user-not-found' ||
+                error.code === 'auth/invalid-user-token' ||
+                error.code === 'permission-denied'
+            ) {
+                await auth.signOut();
+                navigate('/');
+            } else {
+                toast.error(error.message);
+            }
         }
     }
 
+    // Listen to typing status
     useEffect(() => {
         if (chatUser && userData) {
             const userRef = doc(db, 'users', chatUser.rId);
@@ -104,9 +125,10 @@ const AppContextProvider = (props) => {
         }
     }, [chatUser, userData]);
 
+    // Listen to chat list
     useEffect(() => {
         if (userData) {
-            const chatRef = doc(db, 'chats', userData.id)
+            const chatRef = doc(db, 'chats', userData.id);
             const unSub = onSnapshot(chatRef, async (res) => {
                 const chatItems = res.data().chatsData;
                 const tempData = [];
@@ -117,7 +139,7 @@ const AppContextProvider = (props) => {
                     tempData.push({ ...item, userData });
                 }
                 setChatData(tempData.sort((a, b) => b.updatedAt - a.updatedAt));
-            })
+            });
             return () => unSub();
         }
     }, [userData])
@@ -125,8 +147,8 @@ const AppContextProvider = (props) => {
     useEffect(() => {
         if (userData) {
             setInterval(async () => {
-                const chatRef = doc(db, 'chats', userData.id)
-                const data = await getDoc(chatRef)
+                const chatRef = doc(db, 'chats', userData.id);
+                const data = await getDoc(chatRef);
                 const chatItems = data.data().chatsData;
                 const tempData = [];
                 for (const item of chatItems) {
