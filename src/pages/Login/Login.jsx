@@ -44,20 +44,20 @@ const Login = () => {
         <h2 className="form-heading">{currState === 'Sign up' ? 'Create account' : 'Welcome back'}</h2>
         <p className="form-sub">{currState === 'Sign up' ? 'Join and start chatting today' : 'Sign in to continue chatting'}</p>
 
-        <form onSubmit={onSubmitHandler}>
+        <form onSubmit={onSubmitHandler} autoComplete={currState === "Login" ? "on" : "off"}>
           {currState === "Sign up" &&
             <div className="form-group">
               <label className="form-label">Username</label>
-              <input onChange={(e) => setUserName(e.target.value)} value={userName} className='form-input' type="text" placeholder='your username' autoComplete="off" required />
+              <input onChange={(e) => setUserName(e.target.value)} value={userName} className='form-input' type="text" placeholder='your username' autoComplete="username" required />
             </div>
           }
           <div className="form-group">
             <label className="form-label">Email</label>
-            <input onChange={(e) => setEmail(e.target.value)} value={email} className='form-input' type="email" placeholder='hello@example.com' required />
+            <input onChange={(e) => setEmail(e.target.value)} value={email} className='form-input' type="email" placeholder='hello@example.com' autoComplete={currState === "Login" ? "email" : "off"} required />
           </div>
           <div className="form-group">
             <label className="form-label">Password</label>
-            <input onChange={(e) => setPassword(e.target.value)} value={password} className='form-input' type="password" placeholder='••••••••' required />
+            <input onChange={(e) => setPassword(e.target.value)} value={password} className='form-input' type="password" placeholder='••••••••' autoComplete={currState === "Login" ? "current-password" : "new-password"} required />
           </div>
 
           <div className="login-term">
