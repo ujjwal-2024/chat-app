@@ -426,3 +426,29 @@
     cursor: pointer !important;
   }
 }
+
+/* Force show info button on mobile - override all */
+@media (max-width: 900px) {
+  .chat-user .help {
+    display: block !important;
+    filter: brightness(0) invert(1) !important;
+    opacity: 0.8 !important;
+    width: 22px !important;
+    height: 22px !important;
+    cursor: pointer !important;
+    border-radius: 0 !important;
+    background: none !important;
+  }
+  
+  /* Move info dropdown to left so it doesn't go off screen */
+  .info-dropdown {
+    right: 0 !important;
+    left: auto !important;
+    min-width: 200px !important;
+  }
+
+  /* Hide theme toggle on chat page on mobile - it overlaps */
+  .chat-theme-toggle {
+    display: none !important;
+  }
+}
